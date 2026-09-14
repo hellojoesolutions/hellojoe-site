@@ -1,0 +1,51 @@
+name: Sanitize demo review placeholders
+
+on:
+  push:
+    paths:
+      - '.github/workflows/sanitize-demo-reviews.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sanitize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Replace illustrative testimonials with labeled placeholders
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          replacements = {
+              '“Fast, friendly, and very easy to work with. They made our business look more established online.”': '“Verified customer feedback will appear here.”',
+              '“Clear communication, professional work, and a much stronger online presence for our clinic.”': '“Verified customer feedback will appear here.”',
+              '“They helped us look sharper online and made the process simple from start to finish.”': '“Verified customer feedback will appear here.”',
+              '“Professional, creative, and easy to work with. We finally have something that reflects the business well.”': '“Verified customer feedback will appear here.”',
+              'Melissa R. · McAllen, TX': 'Review placeholder · verification pending',
+              'Daniela C. · Mission, TX': 'Review placeholder · verification pending',
+              'Ricardo M. · Edinburg, TX': 'Review placeholder · verification pending',
+              'Sofia V. · Pharr, TX': 'Review placeholder · verification pending',
+          }
+          for old, new in replacements.items():
+              s = s.replace(old, new)
+          p.write_text(s, encoding='utf-8')
+
+      - name: Commit safe placeholders
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'Label demo review content as placeholders'
+          git push origin HEAD:main
