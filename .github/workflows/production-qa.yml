@@ -1,0 +1,197 @@
+name: Production layout QA
+
+on:
+  push:
+    paths:
+      - '*.html'
+      - 'assets/**'
+      - '.github/workflows/production-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static integrity checks
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          import re, json
+
+          files = sorted(Path('.').glob('*.html'))
+          names = {p.name for p in files}
+          failures=[]
+          rows=[]
+          for p in files:
+              t=p.read_text(encoding='utf-8')
+              local=[]
+              for href in re.findall(r'href=["\']([^"\']+)["\']',t,re.I):
+                  target=href.split('#',1)[0].split('?',1)[0]
+                  if not target or target.startswith(('http://','https://','mailto:','tel:','#')):
+                      continue
+                  if target.endswith('.html') and Path(target).name not in names:
+                      local.append(target)
+              row={
+                'page':p.name,
+                'h1':t.lower().count('<h1'),
+                'canonical':bool(re.search(r'<link[^>]+rel=["\']canonical["\']',t,re.I)),
+                'description':bool(re.search(r'<meta[^>]+name=["\']description["\']',t,re.I)),
+                'polish': 'assets/production-polish.css' in t,
+                'broken_local_links':sorted(set(local)),
+              }
+              rows.append(row)
+              if row['h1'] != 1: failures.append(f'{p}: H1 count {row["h1"]}')
+              if not row['canonical']: failures.append(f'{p}: canonical missing')
+              if not row['description']: failures.append(f'{p}: description missing')
+              if not row['polish']: failures.append(f'{p}: production polish CSS missing')
+              if row['broken_local_links']: failures.append(f'{p}: broken local links {row["broken_local_links"]}')
+
+          Path('qa-static.json').write_text(json.dumps(rows,indent=2),encoding='utf-8')
+          if failures:
+              print('\n'.join(failures))
+              raise SystemExit(1)
+          print(f'PASS: {len(files)} HTML pages passed static integrity checks')
+          PY
+
+      - name: Validate homepage JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          t=Path('index.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script(?![^>]+type=["\']application/ld\+json["\'])[^>]*>(.*?)</script>',t,re.S|re.I)
+          Path('/tmp/hellojoe-home.js').write_text('\n'.join(scripts),encoding='utf-8')
+          print(f'Extracted {len(scripts)} executable script block(s)')
+          PY
+          node --check /tmp/hellojoe-home.js
+
+      - name: Install lightweight browser driver
+        run: npm install --no-save playwright-core@1.55.0
+
+      - name: Start local site
+        run: |
+          python3 -m http.server 4173 >/tmp/hellojoe-server.log 2>&1 &
+          echo $! > /tmp/hellojoe-server.pid
+          sleep 2
+          curl -fsS http://127.0.0.1:4173/index.html >/dev/null
+
+      - name: Browser layout and interaction smoke test
+        run: |
+          BROWSER_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$BROWSER_BIN" ]; then
+            echo 'No system Chromium/Chrome binary found.'
+            exit 1
+          fi
+          export BROWSER_BIN
+          node <<'NODE'
+          const fs=require('fs');
+          const {chromium}=require('playwright-core');
+          const pages=[
+            'index.html','pricing.html','resources.html','rgv-marketing.html','mcallen-marketing.html',
+            'mission-marketing.html','pharr-marketing.html','social-media-management.html','local-seo.html',
+            'google-rgv.html','google-business-profile.html','marketing-where-to-start.html','website-traffic-no-leads.html'
+          ];
+          const viewports=[
+            {name:'desktop',width:1440,height:1000},
+            {name:'tablet',width:1024,height:900},
+            {name:'mobile',width:390,height:844}
+          ];
+          (async()=>{
+            const browser=await chromium.launch({headless:true,executablePath:process.env.BROWSER_BIN,args:['--no-sandbox']});
+            const results=[]; const failures=[];
+            for(const vp of viewports){
+              const context=await browser.newContext({viewport:{width:vp.width,height:vp.height},reducedMotion:'no-preference'});
+              for(const file of pages){
+                const page=await context.newPage();
+                const consoleErrors=[];
+                page.on('pageerror',e=>consoleErrors.push(String(e)));
+                page.on('console',m=>{if(m.type()==='error') consoleErrors.push(m.text())});
+                const response=await page.goto(`http://127.0.0.1:4173/${file}`,{waitUntil:'networkidle'});
+                await page.waitForTimeout(file==='index.html'?800:150);
+                const metrics=await page.evaluate(()=>{
+                  const root=document.documentElement;
+                  const body=document.body;
+                  const interactive=[...document.querySelectorAll('a,button,input,select,textarea')].filter(el=>{
+                    const s=getComputedStyle(el); const r=el.getBoundingClientRect();
+                    return s.display!=='none' && s.visibility!=='hidden' && r.width>0 && r.height>0;
+                  });
+                  const unlabeled=interactive.filter(el=>{
+                    if(['INPUT','SELECT','TEXTAREA'].includes(el.tagName)) return false;
+                    return !(el.innerText||el.getAttribute('aria-label')||el.getAttribute('title')||'').trim();
+                  }).length;
+                  return {
+                    title:document.title,
+                    scrollWidth:Math.max(root.scrollWidth,body.scrollWidth),
+                    innerWidth:window.innerWidth,
+                    h1:document.querySelectorAll('h1').length,
+                    unlabeled,
+                    bodyHeight:Math.max(root.scrollHeight,body.scrollHeight)
+                  };
+                });
+                const overflow=metrics.scrollWidth-metrics.innerWidth;
+                const okStatus=response && response.ok();
+                if(!okStatus) failures.push(`${vp.name} ${file}: HTTP ${response?.status()}`);
+                if(overflow>3) failures.push(`${vp.name} ${file}: horizontal overflow ${overflow}px`);
+                if(metrics.h1!==1) failures.push(`${vp.name} ${file}: ${metrics.h1} H1s`);
+                if(metrics.unlabeled>0) failures.push(`${vp.name} ${file}: ${metrics.unlabeled} unlabeled visible interactive controls`);
+                if(consoleErrors.length) failures.push(`${vp.name} ${file}: browser errors: ${consoleErrors.slice(0,2).join(' | ')}`);
+
+                if(file==='index.html'){
+                  const opener=await page.locator('#openingSearch').count();
+                  const funnel=await page.locator('#leadFunnelStage').count();
+                  const modal=page.locator('#leadModal');
+                  if(!opener||!funnel) failures.push(`${vp.name} homepage: locked opener/funnel missing`);
+                  await page.locator('.js-open').first().click();
+                  await page.waitForTimeout(120);
+                  const modalVisible=await modal.isVisible().catch(()=>false);
+                  if(!modalVisible) failures.push(`${vp.name} homepage: intake modal did not open`);
+                  await page.locator('.js-close').first().click();
+                  if(vp.name==='desktop'){
+                    const activeBefore=await page.locator('.hj-look-word.is-active').innerText().catch(()=>null);
+                    await page.waitForTimeout(1900);
+                    const activeAfter=await page.locator('.hj-look-word.is-active').innerText().catch(()=>null);
+                    if(activeBefore && activeAfter && activeBefore===activeAfter) failures.push('desktop homepage: platform rotator did not advance');
+                    const hero=page.locator('#heroScroll');
+                    const box=await hero.boundingBox();
+                    if(box){
+                      await page.evaluate(y=>window.scrollTo(0,y),box.y+box.height*.62);
+                      await page.waitForTimeout(250);
+                      const strategyVisible=await page.locator('#leadFunnelStage.exploded').count();
+                      if(!strategyVisible) failures.push('desktop homepage: search-to-strategy transition did not activate');
+                    }
+                  }
+                }
+                results.push({viewport:vp.name,page:file,...metrics,overflow,consoleErrors});
+                await page.close();
+              }
+              await context.close();
+            }
+            await browser.close();
+            fs.writeFileSync('qa-browser.json',JSON.stringify(results,null,2));
+            const lines=['# HelloJoe Production QA','',`Run: ${new Date().toISOString()}`,'',`Pages tested: ${pages.length}`,'Viewports: desktop 1440px, tablet 1024px, mobile 390px','',failures.length?'## FAIL':'## PASS',''];
+            if(failures.length) lines.push(...failures.map(x=>`- ${x}`));
+            else lines.push('- No horizontal overflow detected.','- All tested pages returned successfully with one H1.','- No browser JavaScript errors detected.','- Visible interactive controls had accessible text.','- Homepage lead modal opened and closed.','- Homepage platform rotation advanced.','- Homepage search-to-strategy transition activated on desktop.');
+            fs.writeFileSync('PRODUCTION_QA.md',lines.join('\n')+'\n');
+            if(failures.length){console.error(failures.join('\n'));process.exit(1)}
+            console.log(lines.join('\n'));
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+
+      - name: Commit QA report
+        if: success()
+        run: |
+          git config user.name 'hellojoesolutions'
+          git config user.email 'joe@hellojoe.solutions'
+          git add PRODUCTION_QA.md qa-static.json qa-browser.json
+          if git diff --cached --quiet; then
+            echo 'QA report unchanged.'
+            exit 0
+          fi
+          git commit -m 'Record production desktop and mobile QA results'
+          git push
