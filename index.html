@@ -3656,7 +3656,11 @@ h2{
 
     <div class="progress"><div class="bar" id="bar"></div></div>
 
-    <form id="leadIntakeForm">
+    <form id="leadIntakeForm" name="hellojoe-lead" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thanks.html">
+      <input type="hidden" name="form-name" value="hellojoe-lead">
+      <input type="hidden" name="services" id="leadServicesHidden">
+      <input type="hidden" name="callType" id="leadCallTypeHidden" value="Phone">
+      <p hidden><label>Do not fill this out: <input name="bot-field"></label></p>
       <div class="q active" data-step="1">
         <div class="eyebrow">Step 1 of 5</div>
         <h3>What do you want help with?</h3>
@@ -3711,7 +3715,7 @@ h2{
       <div class="q" data-step="5">
         <div class="eyebrow">Step 5 of 5</div>
         <h3>Choose your 10-minute intro.</h3>
-        <p class="intake-help">This is a preference for the prototype. Live calendar availability gets connected at deployment.</p>
+        <p class="intake-help">Choose a preferred day and time. We’ll confirm availability with you directly.</p>
 
         <div class="call-type-row">
           <button type="button" class="choice call-type selected" data-value="Phone">Phone call</button>
@@ -3741,11 +3745,11 @@ h2{
       </div>
 
       <div class="q" data-step="6">
-        <div class="eyebrow">Ready for scheduling</div>
+        <div class="eyebrow">Ready to send</div>
         <h3>That’s enough to start.</h3>
-        <p class="intake-help">At launch, this final button will send the lead and open live 10-minute calendar availability. The intake UI and data are ready now.</p>
+        <p class="intake-help">Send your request and we’ll follow up to confirm the best 10-minute time.</p>
         <div class="lead-review-box" id="leadReviewBox"></div>
-        <div class="modal-actions"><button class="skip prev" type="button">← Edit</button><a class="cta" id="leadEmailFallback" href="mailto:joe@hellojoe.solutions">Email HelloJoe →</a></div>
+        <div class="modal-actions"><button class="skip prev" type="button">← Edit</button><button class="cta" id="leadSubmit" type="submit">Send my request →</button><a class="skip" id="leadEmailFallback" href="mailto:joe@hellojoe.solutions">Email instead →</a></div>
       </div>
     </form>
   </div>
@@ -3848,6 +3852,16 @@ function updateLeadSummary(){
 const leadFinish=document.getElementById('leadFinish');
 if(leadFinish){
   leadFinish.addEventListener('click',()=>{
+    if(!val('leadName') || !val('leadPhone')){
+      showStep(3);
+      const requiredTarget=!val('leadName')?document.getElementById('leadName'):document.getElementById('leadPhone');
+      if(requiredTarget) requiredTarget.reportValidity();
+      return;
+    }
+    const servicesHidden=document.getElementById('leadServicesHidden');
+    if(servicesHidden) servicesHidden.value=leadServices.join(', ') || 'Not sure';
+    const callTypeHidden=document.getElementById('leadCallTypeHidden');
+    if(callTypeHidden) callTypeHidden.value=leadCallType;
     const review=document.getElementById('leadReviewBox');
     const subject=encodeURIComponent(`10-minute intro request${val('leadBusinessName')?' — '+val('leadBusinessName'):''}`);
     const body=encodeURIComponent(
