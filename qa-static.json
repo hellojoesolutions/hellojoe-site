@@ -1,0 +1,119 @@
+[
+  {
+    "page": "google-business-profile.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  },
+  {
+    "page": "google-rgv.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  },
+  {
+    "page": "index.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  },
+  {
+    "page": "local-seo.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  },
+  {
+    "page": "marketing-where-to-start.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  },
+  {
+    "page": "mcallen-marketing.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  },
+  {
+    "page": "mission-marketing.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  },
+  {
+    "page": "pharr-marketing.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  },
+  {
+    "page": "pricing.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  },
+  {
+    "page": "resources.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  },
+  {
+    "page": "rgv-marketing.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  },
+  {
+    "page": "social-media-management.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  },
+  {
+    "page": "website-traffic-no-leads.html",
+    "h1": 1,
+    "canonical": true,
+    "description": true,
+    "polish": true,
+    "favicon": true,
+    "broken_local_links": []
+  }
+]
