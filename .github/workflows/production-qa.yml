@@ -1,3 +1,4 @@
+# Production QA runs after all launch assets are present on main.
 name: Production layout QA
 
 on:
@@ -42,6 +43,7 @@ jobs:
                 'canonical':bool(re.search(r'<link[^>]+rel=["\']canonical["\']',t,re.I)),
                 'description':bool(re.search(r'<meta[^>]+name=["\']description["\']',t,re.I)),
                 'polish':'assets/production-polish.css' in t,
+                'favicon':'assets/favicon.svg' in t,
                 'broken_local_links':sorted(set(local)),
               }
               rows.append(row)
@@ -49,6 +51,7 @@ jobs:
               if not row['canonical']: failures.append(f'{p}: canonical missing')
               if not row['description']: failures.append(f'{p}: description missing')
               if not row['polish']: failures.append(f'{p}: production polish CSS missing')
+              if not row['favicon']: failures.append(f'{p}: favicon missing')
               if row['broken_local_links']: failures.append(f'{p}: broken local links {row["broken_local_links"]}')
 
           Path('qa-static.json').write_text(json.dumps(rows,indent=2),encoding='utf-8')
