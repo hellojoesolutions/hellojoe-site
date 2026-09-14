@@ -1,0 +1,75 @@
+name: Apply production polish
+
+on:
+  push:
+    paths:
+      - 'assets/production-polish.css'
+      - '.github/workflows/apply-production-polish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Inject production stylesheet
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          marker = '<link rel="stylesheet" href="assets/production-polish.css">'
+          changed = []
+          for path in sorted(Path('.').glob('*.html')):
+              text = path.read_text(encoding='utf-8')
+              if marker in text:
+                  continue
+              if '</head>' not in text:
+                  raise SystemExit(f'Missing </head> in {path}')
+              text = text.replace('</head>', f'{marker}\n</head>', 1)
+              path.write_text(text, encoding='utf-8')
+              changed.append(str(path))
+          print('Updated:', ', '.join(changed) if changed else 'nothing')
+          PY
+
+      - name: Verify site structure
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          html_files = sorted(Path('.').glob('*.html'))
+          marker = '<link rel="stylesheet" href="assets/production-polish.css">'
+          failures = []
+          for path in html_files:
+              text = path.read_text(encoding='utf-8')
+              if marker not in text:
+                  failures.append(f'{path}: polish stylesheet missing')
+              if text.count('<h1') != 1:
+                  failures.append(f'{path}: expected 1 H1, found {text.count("<h1")}')
+              if not re.search(r'<meta[^>]+name=["\']description["\']', text, re.I):
+                  failures.append(f'{path}: meta description missing')
+              if not re.search(r'<link[^>]+rel=["\']canonical["\']', text, re.I):
+                  failures.append(f'{path}: canonical missing')
+          if failures:
+              print('\n'.join(failures))
+              raise SystemExit(1)
+          print(f'PASS: {len(html_files)} HTML pages include polish CSS, one H1, meta description and canonical.')
+          PY
+
+      - name: Commit injected links
+        run: |
+          if git diff --quiet; then
+            echo 'No HTML changes required.'
+            exit 0
+          fi
+          git config user.name 'hellojoesolutions'
+          git config user.email 'joe@hellojoe.solutions'
+          git add '*.html'
+          git commit -m 'Apply final production spacing and responsive polish'
+          git push
