@@ -1,0 +1,49 @@
+name: Expand HelloJoe launch site
+
+on:
+  push:
+    paths:
+      - '.bootstrap/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  expand:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Confirm archive chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          for part in aa ab ac ad ae af; do
+            test -f ".bootstrap/site.b64.$part"
+          done
+
+      - name: Expand launch site
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .bootstrap/site.b64.aa .bootstrap/site.b64.ab .bootstrap/site.b64.ac .bootstrap/site.b64.ad .bootstrap/site.b64.ae .bootstrap/site.b64.af | base64 --decode > /tmp/hellojoe-site.tar.gz
+          tar -xzf /tmp/hellojoe-site.tar.gz -C .
+          rm -rf .bootstrap
+
+      - name: Commit expanded site
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Expand HelloJoe launch site'
+          git push origin HEAD:main
