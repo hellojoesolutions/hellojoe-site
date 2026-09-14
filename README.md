@@ -5,6 +5,7 @@ Production-ready static launch build for **HelloJoe Business Solutions** (`hello
 ## Included
 
 - Main marketing homepage with interactive 10-minute lead intake
+- Netlify Forms lead capture with confirmation page
 - Pricing page
 - RGV, McAllen, Mission, and Pharr local marketing pages
 - Social Media Management service page
@@ -40,25 +41,31 @@ Studio: https://hellojoe-business-solutions.sanity.studio/
 
 API credentials are intentionally not stored in this repository.
 
-## Deployment
+## Production deployment
 
-The site is currently a static HTML build and can be deployed from the repository root with Cloudflare Pages or another static host.
+The site is configured for **Netlify** from the repository root.
 
-Recommended Cloudflare Pages settings:
+Recommended Netlify settings:
+- Repository: `hellojoesolutions/hellojoe-site`
 - Production branch: `main`
-- Framework preset: None
 - Build command: leave blank
-- Output directory: repository root
+- Publish directory: `.`
 - Canonical domain: `https://hellojoe.solutions`
 - Redirect `www.hellojoe.solutions` to `hellojoe.solutions`
 
-## Before public launch
+`netlify.toml` contains clean-URL routing for service, city, pricing, and resource pages plus baseline security and asset-cache headers.
 
-- Connect the live lead form endpoint and scheduler
+## Lead intake
+
+The 10-minute intake is configured as a Netlify Form named `hellojoe-lead`. It collects the requested services, business/contact information, preferred call type/date/time, and optional context, then routes successful submissions to `thanks.html`.
+
+## After hosting is connected
+
+- Configure Netlify form submission notifications for `joe@hellojoe.solutions`
+- Connect `hellojoe.solutions` and `www.hellojoe.solutions`
+- Preserve all existing Google email MX/TXT records during DNS changes
 - Add GA4 and conversion events
 - Verify Search Console and submit `/sitemap.xml`
 - Add Microsoft Clarity if desired
-- Complete Google Business Profile optimization
-- Replace any illustrative review/testimonial content with verified real reviews before publication
-- Add verified case-study metrics when available
-- Perform final visual spacing/mobile QA before switching production DNS
+- Continue Google Business Profile optimization
+- Add verified testimonials/case-study metrics as they become available
