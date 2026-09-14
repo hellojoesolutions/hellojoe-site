@@ -1,0 +1,81 @@
+[build]
+  publish = "."
+
+[build.processing]
+  skip_processing = false
+
+[build.processing.html]
+  pretty_urls = true
+
+[[redirects]]
+  from = "/pricing"
+  to = "/pricing.html"
+  status = 200
+
+[[redirects]]
+  from = "/resources"
+  to = "/resources.html"
+  status = 200
+
+[[redirects]]
+  from = "/rgv-marketing"
+  to = "/rgv-marketing.html"
+  status = 200
+
+[[redirects]]
+  from = "/mcallen-marketing"
+  to = "/mcallen-marketing.html"
+  status = 200
+
+[[redirects]]
+  from = "/mission-marketing"
+  to = "/mission-marketing.html"
+  status = 200
+
+[[redirects]]
+  from = "/pharr-marketing"
+  to = "/pharr-marketing.html"
+  status = 200
+
+[[redirects]]
+  from = "/social-media-management"
+  to = "/social-media-management.html"
+  status = 200
+
+[[redirects]]
+  from = "/local-seo"
+  to = "/local-seo.html"
+  status = 200
+
+[[redirects]]
+  from = "/resources/google-rgv"
+  to = "/google-rgv.html"
+  status = 200
+
+[[redirects]]
+  from = "/resources/google-business-profile"
+  to = "/google-business-profile.html"
+  status = 200
+
+[[redirects]]
+  from = "/resources/marketing-where-to-start"
+  to = "/marketing-where-to-start.html"
+  status = 200
+
+[[redirects]]
+  from = "/resources/website-traffic-no-leads"
+  to = "/website-traffic-no-leads.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
