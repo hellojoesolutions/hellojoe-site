@@ -1,0 +1,79 @@
+name: Wire live lead intake
+
+on:
+  push:
+    paths:
+      - '.github/workflows/wire-live-intake.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Convert prototype intake to Netlify Forms
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          t=p.read_text(encoding='utf-8')
+
+          replacements=[
+            (
+              '<form id="leadIntakeForm">',
+              '<form id="leadIntakeForm" name="hellojoe-lead" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thanks.html">\n      <input type="hidden" name="form-name" value="hellojoe-lead">\n      <input type="hidden" name="services" id="leadServicesHidden">\n      <input type="hidden" name="callType" id="leadCallTypeHidden" value="Phone">\n      <p hidden><label>Do not fill this out: <input name="bot-field"></label></p>'
+            ),
+            (
+              'This is a preference for the prototype. Live calendar availability gets connected at deployment.',
+              'Choose a preferred day and time. We’ll confirm availability with you directly.'
+            ),
+            (
+              '<div class="eyebrow">Ready for scheduling</div>',
+              '<div class="eyebrow">Ready to send</div>'
+            ),
+            (
+              'At launch, this final button will send the lead and open live 10-minute calendar availability. The intake UI and data are ready now.',
+              'Send your request and we’ll follow up to confirm the best 10-minute time.'
+            ),
+            (
+              '<div class="modal-actions"><button class="skip prev" type="button">← Edit</button><a class="cta" id="leadEmailFallback" href="mailto:joe@hellojoe.solutions">Email HelloJoe →</a></div>',
+              '<div class="modal-actions"><button class="skip prev" type="button">← Edit</button><button class="cta" id="leadSubmit" type="submit">Send my request →</button><a class="skip" id="leadEmailFallback" href="mailto:joe@hellojoe.solutions">Email instead →</a></div>'
+            ),
+            (
+              "leadFinish.addEventListener('click',()=>{\n    const review=document.getElementById('leadReviewBox');",
+              "leadFinish.addEventListener('click',()=>{\n    if(!val('leadName') || !val('leadPhone')){\n      showStep(3);\n      const requiredTarget=!val('leadName')?document.getElementById('leadName'):document.getElementById('leadPhone');\n      if(requiredTarget) requiredTarget.reportValidity();\n      return;\n    }\n    const servicesHidden=document.getElementById('leadServicesHidden');\n    if(servicesHidden) servicesHidden.value=leadServices.join(', ') || 'Not sure';\n    const callTypeHidden=document.getElementById('leadCallTypeHidden');\n    if(callTypeHidden) callTypeHidden.value=leadCallType;\n    const review=document.getElementById('leadReviewBox');"
+            )
+          ]
+
+          for old,new in replacements:
+            count=t.count(old)
+            if count != 1:
+              raise SystemExit(f'Expected exactly one match, found {count}: {old[:80]}')
+            t=t.replace(old,new,1)
+
+          p.write_text(t,encoding='utf-8')
+          PY
+
+      - name: Verify live intake wiring
+        run: |
+          grep -Fq 'name="hellojoe-lead" method="POST" data-netlify="true"' index.html
+          grep -Fq 'name="services" id="leadServicesHidden"' index.html
+          grep -Fq 'id="leadSubmit" type="submit"' index.html
+          grep -Fq 'action="/thanks.html"' index.html
+          ! grep -Fq 'preference for the prototype' index.html
+          ! grep -Fq 'At launch, this final button' index.html
+          test -f thanks.html
+
+      - name: Commit live intake
+        run: |
+          git config user.name 'hellojoesolutions'
+          git config user.email 'joe@hellojoe.solutions'
+          git add index.html
+          git commit -m 'Wire live 10-minute lead intake for Netlify Forms'
+          git push
