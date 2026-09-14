@@ -1,0 +1,59 @@
+name: Deploy GitHub Pages Preview
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.html'
+      - 'assets/**'
+      - 'robots.txt'
+      - '.github/workflows/deploy-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-preview
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Prepare preview artifact
+        run: |
+          mkdir -p _site
+          cp -a ./*.html _site/
+          cp -a assets _site/
+          cp robots.txt sitemap.xml _site/ 2>/dev/null || true
+          python3 - <<'PY'
+          from pathlib import Path
+          marker='<meta name="robots" content="noindex,nofollow,noarchive">'
+          for p in Path('_site').glob('*.html'):
+              t=p.read_text(encoding='utf-8')
+              if marker not in t:
+                  t=t.replace('</head>', marker+'\n</head>', 1)
+                  p.write_text(t, encoding='utf-8')
+          Path('_site/robots.txt').write_text('User-agent: *\nDisallow: /\n', encoding='utf-8')
+          PY
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
