@@ -1,0 +1,44 @@
+name: Final launch cleanup
+
+on:
+  push:
+    paths:
+      - '.github/workflows/launch-cleanup.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Remove pre-launch wording
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('pricing.html')
+          t = p.read_text(encoding='utf-8')
+          old = 'We will finalize exact post and video counts before this pricing page goes live.'
+          new = 'Exact post and video counts are confirmed with you before service begins.'
+          if old not in t:
+              raise SystemExit('Expected pricing launch note not found; refusing broad edit.')
+          p.write_text(t.replace(old, new, 1), encoding='utf-8')
+          PY
+
+      - name: Validate replacement
+        run: |
+          grep -Fq 'Exact post and video counts are confirmed with you before service begins.' pricing.html
+          ! grep -Fq 'before this pricing page goes live' pricing.html
+
+      - name: Commit launch cleanup
+        run: |
+          git config user.name 'hellojoesolutions'
+          git config user.email 'joe@hellojoe.solutions'
+          git add pricing.html
+          git commit -m 'Remove pre-launch wording from public pricing page'
+          git push
