@@ -1,0 +1,90 @@
+{
+  "date": "2026-09-14",
+  "checks": [
+    {
+      "file": "website-traffic-no-leads.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "resources.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "mcallen-marketing.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "index.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "google-business-profile.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "social-media-management.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "pricing.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "rgv-marketing.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "google-rgv.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "pharr-marketing.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "mission-marketing.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "local-seo.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "marketing-where-to-start.html",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "internal links",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "index.html JavaScript",
+      "status": "PASS",
+      "issues": []
+    },
+    {
+      "file": "critical homepage animation/intake nodes",
+      "status": "PASS",
+      "issues": []
+    }
+  ],
+  "notes": [
+    "Browser-interaction QA should be repeated after deployment because this environment blocks local browser navigation.",
+    "The lead intake UI is complete as a prototype; a real form endpoint and live calendar must be connected at deployment.",
+    "Case-study proof and review/testimonial verification are intentionally not part of this pass."
+  ]
+}
