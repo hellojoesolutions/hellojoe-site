@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'assets/production-polish.css'
+      - 'assets/favicon.svg'
       - '.github/workflows/apply-production-polish.yml'
   workflow_dispatch:
 
@@ -18,20 +19,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Inject production stylesheet
+      - name: Inject production assets
         run: |
           python3 - <<'PY'
           from pathlib import Path
 
-          marker = '<link rel="stylesheet" href="assets/production-polish.css">'
+          css_marker = '<link rel="stylesheet" href="assets/production-polish.css">'
+          favicon_marker = '<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">'
           changed = []
           for path in sorted(Path('.').glob('*.html')):
               text = path.read_text(encoding='utf-8')
-              if marker in text:
+              additions = []
+              if css_marker not in text:
+                  additions.append(css_marker)
+              if favicon_marker not in text:
+                  additions.append(favicon_marker)
+              if not additions:
                   continue
               if '</head>' not in text:
                   raise SystemExit(f'Missing </head> in {path}')
-              text = text.replace('</head>', f'{marker}\n</head>', 1)
+              text = text.replace('</head>', '\n'.join(additions) + '\n</head>', 1)
               path.write_text(text, encoding='utf-8')
               changed.append(str(path))
           print('Updated:', ', '.join(changed) if changed else 'nothing')
@@ -44,12 +51,17 @@ jobs:
           import re
 
           html_files = sorted(Path('.').glob('*.html'))
-          marker = '<link rel="stylesheet" href="assets/production-polish.css">'
+          css_marker = '<link rel="stylesheet" href="assets/production-polish.css">'
+          favicon_marker = '<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">'
           failures = []
+          if not Path('assets/favicon.svg').exists():
+              failures.append('assets/favicon.svg missing')
           for path in html_files:
               text = path.read_text(encoding='utf-8')
-              if marker not in text:
+              if css_marker not in text:
                   failures.append(f'{path}: polish stylesheet missing')
+              if favicon_marker not in text:
+                  failures.append(f'{path}: favicon link missing')
               if text.count('<h1') != 1:
                   failures.append(f'{path}: expected 1 H1, found {text.count("<h1")}')
               if not re.search(r'<meta[^>]+name=["\']description["\']', text, re.I):
@@ -59,7 +71,7 @@ jobs:
           if failures:
               print('\n'.join(failures))
               raise SystemExit(1)
-          print(f'PASS: {len(html_files)} HTML pages include polish CSS, one H1, meta description and canonical.')
+          print(f'PASS: {len(html_files)} HTML pages include polish CSS, favicon, one H1, meta description and canonical.')
           PY
 
       - name: Commit injected links
@@ -71,5 +83,5 @@ jobs:
           git config user.name 'hellojoesolutions'
           git config user.email 'joe@hellojoe.solutions'
           git add '*.html'
-          git commit -m 'Apply final production spacing and responsive polish'
+          git commit -m 'Add production favicon across site pages'
           git push
