@@ -1,0 +1,219 @@
+/* HelloJoe production polish — spacing, mobile, accessibility only.
+   This layer intentionally preserves approved copy, pricing, SEO architecture,
+   hero search/strategy behavior, and interactive service logic. */
+
+html,body{overflow-x:clip}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+img,svg,video{max-width:100%;height:auto}
+button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+
+:where(a,button,input,select,textarea):focus-visible{
+  outline:3px solid color-mix(in srgb,var(--blue,#4c7fe8) 72%,#fff);
+  outline-offset:3px;
+}
+
+/* Keep anchored navigation from landing underneath the sticky header. */
+:where(section,[id]){scroll-margin-top:92px}
+
+/* ---------- Homepage rhythm ---------- */
+#visibility,
+#services,
+#pick,
+#work,
+#pricing,
+#resources{
+  padding-top:clamp(76px,6.2vw,104px)!important;
+  padding-bottom:clamp(76px,6.2vw,104px)!important;
+}
+#process{
+  padding-top:clamp(74px,6vw,100px)!important;
+  padding-bottom:clamp(76px,6vw,102px)!important;
+}
+.final{
+  padding-top:clamp(76px,6vw,102px)!important;
+  padding-bottom:clamp(80px,6.4vw,108px)!important;
+}
+
+/* Headings sit closer to the content they introduce. */
+.eyebrow{margin-bottom:13px!important}
+h2{margin-bottom:20px!important}
+.copy{line-height:1.62!important}
+.section-head-simple{gap:clamp(34px,5vw,58px)!important}
+
+/* Visibility cards: reduce dead space while keeping editorial scale. */
+.channel-grid{gap:14px!important;margin-top:34px!important}
+.channel-card{
+  min-height:258px!important;
+  padding:22px!important;
+}
+.channel-icon{margin-bottom:38px!important}
+.channel-card h3{margin-bottom:10px!important}
+
+/* Service selector stays compact and scan-friendly. */
+.service-selector-grid{margin-top:32px!important;gap:11px!important}
+.service-select-card{min-height:146px!important}
+.service-select-card .service-icon{margin-bottom:20px!important}
+.pick-summary{margin-top:10px!important}
+
+/* Case/project cards: preserve content, tighten the grid. */
+.work-grid{margin-top:34px!important;gap:14px!important}
+.case{padding:clamp(22px,2.4vw,30px)!important}
+.case h3{margin-top:clamp(38px,5vw,62px)!important}
+
+/* Process cards were previously visually oversized. */
+.process-deck-intro{padding-bottom:26px!important}
+.deck-cards{gap:14px!important}
+.deck-card{
+  min-height:320px!important;
+  padding:26px!important;
+}
+.deck-card h3{
+  margin:58px 0 14px!important;
+  font-size:clamp(32px,4vw,52px)!important;
+}
+.deck-card p{font-size:15px!important;line-height:1.55!important}
+.deck-card small{margin-top:20px!important}
+
+/* Homepage pricing preview. Pricing copy/structure remains untouched. */
+.price-preview{margin-top:34px!important;gap:12px!important}
+.price{
+  min-height:322px!important;
+  padding:24px!important;
+}
+.price .from{margin-top:26px!important}
+.price p{margin:17px 0 22px!important}
+
+/* Resources/local block. */
+.resources{gap:clamp(34px,5vw,52px)!important}
+.resource-posts{margin-top:28px!important}
+.resource-all-link{margin-top:20px!important}
+.local{padding:26px!important}
+@media(min-width:901px){
+  #resources .local{position:sticky;top:98px}
+}
+
+/* Crawlable local-link block stays prominent without feeling like another hero. */
+.seo-local-links{padding:clamp(72px,5.8vw,96px) 0!important}
+.seo-local-grid{gap:clamp(34px,5vw,58px)!important}
+.seo-local-copy p{margin-bottom:20px!important;line-height:1.65!important}
+
+/* Final CTA: slightly tighter and cleaner. */
+.final-card{padding:clamp(30px,4.2vw,54px)!important}
+.final-card .hero-actions{margin-top:24px!important}
+
+/* ---------- Pricing page ---------- */
+body:has(.quick) .hero{padding:84px 0 64px!important}
+body:has(.quick) section:not(.hero):not(.final){padding:78px 0!important}
+body:has(.quick) .quick{margin-top:36px!important;gap:11px!important}
+body:has(.quick) .quick a{padding:20px!important}
+body:has(.quick) .section-head{gap:clamp(30px,5vw,62px)!important}
+body:has(.quick) .price-block{margin-top:34px!important}
+body:has(.quick) .price-top{padding:28px!important}
+body:has(.quick) .price-name{min-height:196px!important}
+body:has(.quick) .price-copy{gap:24px!important}
+body:has(.quick) .service-catalog{margin-top:34px!important;gap:11px!important}
+body:has(.quick) .faqs{margin-top:30px!important;gap:11px!important}
+
+/* ---------- Location/service/article templates ---------- */
+body:has(.twocol) .hero{padding:82px 0 62px!important}
+body:has(.twocol) section:not(.hero):not(.final){padding:74px 0!important}
+body:has(.twocol) .twocol{gap:clamp(30px,5vw,58px)!important}
+body:has(.twocol) .content p{line-height:1.68!important}
+body:has(.twocol) .content h3{margin-top:28px!important}
+body:has(.twocol) .checklist{margin-top:22px!important;gap:10px!important}
+body:has(.twocol) .cards{margin-top:30px!important;gap:11px!important}
+body:has(.twocol) .card{min-height:188px!important;padding:20px!important}
+body:has(.twocol) .card h3{margin:38px 0 9px!important}
+body:has(.twocol) .faq{margin-top:24px!important}
+body:has(.twocol) .related{margin-top:20px!important}
+
+/* ---------- Touch/mobile ---------- */
+@media(max-width:900px){
+  :where(section,[id]){scroll-margin-top:80px}
+
+  #visibility,
+  #services,
+  #pick,
+  #work,
+  #process,
+  #pricing,
+  #resources{
+    padding-top:60px!important;
+    padding-bottom:60px!important;
+  }
+  .final{padding-top:62px!important;padding-bottom:70px!important}
+
+  .shell{width:min(calc(100% - 32px),var(--max,1240px))!important}
+  .hero .shell.hero-grid{width:min(calc(100% - 32px),var(--max,1240px))!important}
+
+  .section-head-simple{grid-template-columns:1fr!important;gap:18px!important}
+  .resources{grid-template-columns:1fr!important;gap:30px!important}
+  #resources .local{position:static}
+
+  .channel-grid{margin-top:28px!important}
+  .channel-card{min-height:0!important;padding:20px!important}
+  .channel-icon{margin-bottom:28px!important}
+
+  .service-selector-grid{margin-top:26px!important}
+  .pick-summary{padding:18px!important}
+
+  .work-grid{margin-top:28px!important}
+  .case h3{margin-top:34px!important}
+
+  .process-deck-intro{padding-bottom:22px!important}
+  .deck-card{min-height:268px!important;padding:22px!important}
+  .deck-card h3{margin:46px 0 12px!important;font-size:clamp(29px,8.8vw,42px)!important}
+  .deck-card p{font-size:14px!important}
+
+  .price-preview{margin-top:28px!important}
+  .price{min-height:0!important;padding:22px!important}
+  .price .from{margin-top:22px!important}
+
+  .seo-local-links{padding:60px 0!important}
+  .seo-local-grid{gap:22px!important}
+
+  .final-card{padding:28px!important}
+
+  /* Supporting templates */
+  body:has(.quick) .hero,
+  body:has(.twocol) .hero{padding:64px 0 52px!important}
+  body:has(.quick) section:not(.hero):not(.final),
+  body:has(.twocol) section:not(.hero):not(.final){padding:60px 0!important}
+  body:has(.quick) .quick{margin-top:28px!important}
+  body:has(.quick) .price-top{padding:22px!important}
+  body:has(.twocol) .cards{margin-top:24px!important}
+}
+
+@media(max-width:620px){
+  .shell{width:min(calc(100% - 28px),var(--max,1240px))!important}
+  .hero .shell.hero-grid{width:min(calc(100% - 28px),var(--max,1240px))!important}
+
+  h2{margin-bottom:16px!important}
+  .eyebrow{margin-bottom:11px!important}
+
+  .channel-section .channel-head,
+  .pick-head{gap:14px!important}
+
+  .service-selector-grid{gap:9px!important}
+  .service-select-card{min-height:120px!important;padding:14px 11px!important}
+  .service-select-card .service-icon{width:40px!important;height:40px!important;margin-bottom:14px!important}
+  .service-select-card>strong{font-size:12.5px!important}
+
+  .lead-intake-card{max-height:calc(100dvh - 24px);overflow:auto}
+  .call-type-row{flex-direction:column}
+
+  body:has(.quick) .hero h1{font-size:clamp(48px,14vw,70px)!important}
+  body:has(.twocol) .hero h1{font-size:clamp(44px,13vw,66px)!important}
+  body:has(.twocol) .card{min-height:0!important}
+}
+
+/* Tooltips should never cover the interface on touch-only devices. */
+@media(hover:none){
+  .service-select-card::after,.detail{display:none!important}
+}
+
+/* Respect the visitor's reduced-motion preference across decorative motion. */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
