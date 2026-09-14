@@ -1,0 +1,60 @@
+name: Launch readiness
+
+on:
+  push:
+    paths:
+      - '.github/workflows/launch-readiness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Netlify production configuration
+        run: |
+          test -f netlify.toml
+          grep -Fq 'publish = "."' netlify.toml
+          grep -Fq 'from = "/mcallen-marketing"' netlify.toml
+          grep -Fq 'from = "/resources/google-rgv"' netlify.toml
+
+      - name: Verify live lead intake
+        run: |
+          grep -Fq 'name="hellojoe-lead" method="POST" data-netlify="true"' index.html
+          grep -Fq 'netlify-honeypot="bot-field"' index.html
+          grep -Fq 'name="services" id="leadServicesHidden"' index.html
+          grep -Fq 'name="callType" id="leadCallTypeHidden"' index.html
+          grep -Fq 'id="leadSubmit" type="submit"' index.html
+          grep -Fq 'action="/thanks.html"' index.html
+          grep -Fq 'We’ll confirm availability with you directly.' index.html
+          ! grep -Fq 'preference for the prototype' index.html
+          ! grep -Fq 'At launch, this final button' index.html
+          test -f thanks.html
+
+      - name: Verify SEO launch files
+        run: |
+          test -f robots.txt
+          test -f sitemap.xml
+          grep -Fq 'https://hellojoe.solutions/mcallen-marketing' sitemap.xml
+          grep -Fq 'https://hellojoe.solutions/resources/google-rgv' sitemap.xml
+
+      - name: Validate homepage JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text=Path('index.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script(?![^>]+type=["\']application/ld\+json["\'])[^>]*>(.*?)</script>',text,re.S|re.I)
+          Path('/tmp/hellojoe-home.js').write_text('\n'.join(scripts),encoding='utf-8')
+          PY
+          node --check /tmp/hellojoe-home.js
+
+      - name: Confirm confirmation page metadata
+        run: |
+          grep -Fq '<meta name="robots" content="noindex,follow">' thanks.html
+          grep -Fq '<link rel="canonical" href="https://hellojoe.solutions/thanks">' thanks.html
+          grep -Fq 'assets/production-polish.css' thanks.html
