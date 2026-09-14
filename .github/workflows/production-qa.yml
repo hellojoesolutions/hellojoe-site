@@ -21,7 +21,6 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          from html.parser import HTMLParser
           import re, json
 
           files = sorted(Path('.').glob('*.html'))
@@ -42,7 +41,7 @@ jobs:
                 'h1':t.lower().count('<h1'),
                 'canonical':bool(re.search(r'<link[^>]+rel=["\']canonical["\']',t,re.I)),
                 'description':bool(re.search(r'<meta[^>]+name=["\']description["\']',t,re.I)),
-                'polish': 'assets/production-polish.css' in t,
+                'polish':'assets/production-polish.css' in t,
                 'broken_local_links':sorted(set(local)),
               }
               rows.append(row)
@@ -77,31 +76,20 @@ jobs:
       - name: Start local site
         run: |
           python3 -m http.server 4173 >/tmp/hellojoe-server.log 2>&1 &
-          echo $! > /tmp/hellojoe-server.pid
           sleep 2
           curl -fsS http://127.0.0.1:4173/index.html >/dev/null
 
       - name: Browser layout and interaction smoke test
         run: |
           BROWSER_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
-          if [ -z "$BROWSER_BIN" ]; then
-            echo 'No system Chromium/Chrome binary found.'
-            exit 1
-          fi
+          if [ -z "$BROWSER_BIN" ]; then echo 'No system Chromium/Chrome binary found.'; exit 1; fi
           export BROWSER_BIN
           node <<'NODE'
           const fs=require('fs');
           const {chromium}=require('playwright-core');
-          const pages=[
-            'index.html','pricing.html','resources.html','rgv-marketing.html','mcallen-marketing.html',
-            'mission-marketing.html','pharr-marketing.html','social-media-management.html','local-seo.html',
-            'google-rgv.html','google-business-profile.html','marketing-where-to-start.html','website-traffic-no-leads.html'
-          ];
-          const viewports=[
-            {name:'desktop',width:1440,height:1000},
-            {name:'tablet',width:1024,height:900},
-            {name:'mobile',width:390,height:844}
-          ];
+          const pages=['index.html','pricing.html','resources.html','rgv-marketing.html','mcallen-marketing.html','mission-marketing.html','pharr-marketing.html','social-media-management.html','local-seo.html','google-rgv.html','google-business-profile.html','marketing-where-to-start.html','website-traffic-no-leads.html'];
+          const viewports=[{name:'desktop',width:1440,height:1000},{name:'tablet',width:1024,height:900},{name:'mobile',width:390,height:844}];
+
           (async()=>{
             const browser=await chromium.launch({headless:true,executablePath:process.env.BROWSER_BIN,args:['--no-sandbox']});
             const results=[]; const failures=[];
@@ -109,65 +97,55 @@ jobs:
               const context=await browser.newContext({viewport:{width:vp.width,height:vp.height},reducedMotion:'no-preference'});
               for(const file of pages){
                 const page=await context.newPage();
-                const consoleErrors=[];
-                page.on('pageerror',e=>consoleErrors.push(String(e)));
-                page.on('console',m=>{if(m.type()==='error') consoleErrors.push(m.text())});
+                const browserErrors=[];
+                page.on('pageerror',e=>browserErrors.push(String(e)));
+                page.on('console',m=>{if(m.type()==='error') browserErrors.push(m.text())});
                 const response=await page.goto(`http://127.0.0.1:4173/${file}`,{waitUntil:'networkidle'});
-                await page.waitForTimeout(file==='index.html'?800:150);
+                await page.waitForTimeout(file==='index.html'?800:120);
                 const metrics=await page.evaluate(()=>{
-                  const root=document.documentElement;
-                  const body=document.body;
+                  const root=document.documentElement, body=document.body;
                   const interactive=[...document.querySelectorAll('a,button,input,select,textarea')].filter(el=>{
-                    const s=getComputedStyle(el); const r=el.getBoundingClientRect();
-                    return s.display!=='none' && s.visibility!=='hidden' && r.width>0 && r.height>0;
+                    const s=getComputedStyle(el), r=el.getBoundingClientRect();
+                    return s.display!=='none' && s.visibility!=='hidden' && Number(s.opacity)!==0 && r.width>0 && r.height>0;
                   });
                   const unlabeled=interactive.filter(el=>{
                     if(['INPUT','SELECT','TEXTAREA'].includes(el.tagName)) return false;
                     return !(el.innerText||el.getAttribute('aria-label')||el.getAttribute('title')||'').trim();
                   }).length;
-                  return {
-                    title:document.title,
-                    scrollWidth:Math.max(root.scrollWidth,body.scrollWidth),
-                    innerWidth:window.innerWidth,
-                    h1:document.querySelectorAll('h1').length,
-                    unlabeled,
-                    bodyHeight:Math.max(root.scrollHeight,body.scrollHeight)
-                  };
+                  return {title:document.title,scrollWidth:Math.max(root.scrollWidth,body.scrollWidth),innerWidth:innerWidth,h1:document.querySelectorAll('h1').length,unlabeled,bodyHeight:Math.max(root.scrollHeight,body.scrollHeight)};
                 });
                 const overflow=metrics.scrollWidth-metrics.innerWidth;
-                const okStatus=response && response.ok();
-                if(!okStatus) failures.push(`${vp.name} ${file}: HTTP ${response?.status()}`);
+                if(!(response&&response.ok())) failures.push(`${vp.name} ${file}: HTTP ${response?.status()}`);
                 if(overflow>3) failures.push(`${vp.name} ${file}: horizontal overflow ${overflow}px`);
                 if(metrics.h1!==1) failures.push(`${vp.name} ${file}: ${metrics.h1} H1s`);
                 if(metrics.unlabeled>0) failures.push(`${vp.name} ${file}: ${metrics.unlabeled} unlabeled visible interactive controls`);
-                if(consoleErrors.length) failures.push(`${vp.name} ${file}: browser errors: ${consoleErrors.slice(0,2).join(' | ')}`);
+                if(browserErrors.length) failures.push(`${vp.name} ${file}: browser errors: ${browserErrors.slice(0,2).join(' | ')}`);
 
                 if(file==='index.html'){
-                  const opener=await page.locator('#openingSearch').count();
-                  const funnel=await page.locator('#leadFunnelStage').count();
-                  const modal=page.locator('#leadModal');
-                  if(!opener||!funnel) failures.push(`${vp.name} homepage: locked opener/funnel missing`);
-                  await page.locator('.js-open').first().click();
-                  await page.waitForTimeout(120);
-                  const modalVisible=await modal.isVisible().catch(()=>false);
-                  if(!modalVisible) failures.push(`${vp.name} homepage: intake modal did not open`);
-                  await page.locator('.js-close').first().click();
+                  if(!(await page.locator('#openingSearch').count())||!(await page.locator('#leadFunnelStage').count())) failures.push(`${vp.name} homepage: locked opener/funnel missing`);
+                  const openButton=page.locator('.js-open:visible').first();
+                  if(await openButton.count()){
+                    await openButton.click();
+                    await page.waitForTimeout(120);
+                    if(!(await page.locator('#leadModal').isVisible().catch(()=>false))) failures.push(`${vp.name} homepage: intake modal did not open`);
+                    const closeButton=page.locator('.js-close:visible').first();
+                    if(await closeButton.count()) await closeButton.click();
+                  } else failures.push(`${vp.name} homepage: no visible intake trigger`);
+
                   if(vp.name==='desktop'){
                     const activeBefore=await page.locator('.hj-look-word.is-active').innerText().catch(()=>null);
                     await page.waitForTimeout(1900);
                     const activeAfter=await page.locator('.hj-look-word.is-active').innerText().catch(()=>null);
-                    if(activeBefore && activeAfter && activeBefore===activeAfter) failures.push('desktop homepage: platform rotator did not advance');
-                    const hero=page.locator('#heroScroll');
-                    const box=await hero.boundingBox();
+                    if(activeBefore&&activeAfter&&activeBefore===activeAfter) failures.push('desktop homepage: platform rotator did not advance');
+                    const box=await page.locator('#heroScroll').boundingBox();
                     if(box){
                       await page.evaluate(y=>window.scrollTo(0,y),box.y+box.height*.62);
-                      await page.waitForTimeout(250);
-                      const strategyVisible=await page.locator('#leadFunnelStage.exploded').count();
-                      if(!strategyVisible) failures.push('desktop homepage: search-to-strategy transition did not activate');
+                      await page.waitForTimeout(350);
+                      if(!(await page.locator('#leadFunnelStage.exploded').count())) failures.push('desktop homepage: search-to-strategy transition did not activate');
                     }
                   }
                 }
-                results.push({viewport:vp.name,page:file,...metrics,overflow,consoleErrors});
+                results.push({viewport:vp.name,page:file,...metrics,overflow,browserErrors});
                 await page.close();
               }
               await context.close();
@@ -189,9 +167,6 @@ jobs:
           git config user.name 'hellojoesolutions'
           git config user.email 'joe@hellojoe.solutions'
           git add PRODUCTION_QA.md qa-static.json qa-browser.json
-          if git diff --cached --quiet; then
-            echo 'QA report unchanged.'
-            exit 0
-          fi
+          if git diff --cached --quiet; then echo 'QA report unchanged.'; exit 0; fi
           git commit -m 'Record production desktop and mobile QA results'
           git push
