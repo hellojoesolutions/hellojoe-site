@@ -297,3 +297,73 @@ body:has(.twocol) .related{margin-top:20px!important}
     margin-top:44px!important;
   }
 }
+
+/* Mobile hero flow fix — keep both search example and strategy cards in normal flow. */
+@media(max-width:900px){
+  .hero-scroll{
+    height:auto!important;
+  }
+  .hero-sticky{
+    height:auto!important;
+    min-height:0!important;
+    position:relative!important;
+    top:auto!important;
+    overflow:visible!important;
+  }
+  .lead-funnel-stage{
+    min-height:0!important;
+    overflow:visible!important;
+    padding-top:8px!important;
+  }
+  .lead-funnel-stage .google-funnel-card,
+  .lead-funnel-stage.exploded .google-funnel-card{
+    position:relative!important;
+    opacity:1!important;
+    transform:none!important;
+    filter:none!important;
+    pointer-events:auto!important;
+    margin-bottom:20px!important;
+  }
+  .strategy-explosion{
+    position:relative!important;
+    inset:auto!important;
+    min-height:0!important;
+    margin-top:16px!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:12px!important;
+    pointer-events:auto!important;
+  }
+  .strategy-lines,
+  .traffic{
+    display:none!important;
+  }
+  .strategy-core,
+  .strategy-node,
+  .lead-funnel-stage:not(.exploded) .strategy-core,
+  .lead-funnel-stage:not(.exploded) .strategy-node,
+  .lead-funnel-stage.exploded .strategy-core,
+  .lead-funnel-stage.exploded .strategy-node{
+    position:relative!important;
+    left:auto!important;
+    top:auto!important;
+    width:auto!important;
+    min-width:0!important;
+    opacity:1!important;
+    transform:none!important;
+  }
+  .node-google,
+  .node-maps{
+    order:1!important;
+  }
+  .strategy-core{
+    order:2!important;
+    grid-column:1/-1!important;
+    justify-self:center!important;
+    width:min(78%,300px)!important;
+  }
+  .node-social,
+  .node-website{
+    order:3!important;
+  }
+}
