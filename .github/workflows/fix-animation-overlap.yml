@@ -1,0 +1,116 @@
+name: Fix animation overlap and opening spacing
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-animation-overlap.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply animation and spacing corrections
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          css = Path('assets/production-polish.css')
+          c = css.read_text(encoding='utf-8')
+          marker = '/* Screenshot follow-up fixes — platform sequencing + hero gap */'
+          if marker not in c:
+              block = r'''
+
+/* Screenshot follow-up fixes — platform sequencing + hero gap */
+/* Keep the approved 50% platform-title scale, but show only one title at a time. */
+.hj-look-word{
+  opacity:0!important;
+  transition:transform .56s cubic-bezier(.2,.8,.18,1),opacity .14s linear!important;
+}
+.hj-look-word.is-active{
+  opacity:1!important;
+}
+.hj-look-word.is-out{
+  opacity:0!important;
+}
+
+/* Give the descenders in “they / you” a clearly visible cushion above the search bar. */
+.opening-searchbar{
+  margin-top:56px!important;
+}
+
+@media(max-width:900px){
+  .opening-searchbar{
+    margin-top:44px!important;
+  }
+}
+'''
+              css.write_text(c.rstrip() + block + '\n', encoding='utf-8')
+
+          index = Path('index.html')
+          t = index.read_text(encoding='utf-8')
+          old = """function cycleLookWords(){
+  if(lookWords.length<2)return;
+  const current=lookWords[lookIndex];
+  const nextIndex=(lookIndex+1)%lookWords.length;
+  const next=lookWords[nextIndex];
+  current.classList.remove('is-active');current.classList.add('is-out');
+  next.classList.remove('is-out','is-active');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>next.classList.add('is-active')));
+  setTimeout(()=>current.classList.remove('is-out'),760);
+  lookIndex=nextIndex;
+}"""
+          new = """function cycleLookWords(){
+  if(lookWords.length<2)return;
+  const current=lookWords[lookIndex];
+  const nextIndex=(lookIndex+1)%lookWords.length;
+  const next=lookWords[nextIndex];
+  current.classList.remove('is-active');
+  current.classList.add('is-out');
+  setTimeout(()=>{
+    next.classList.remove('is-out','is-active');
+    requestAnimationFrame(()=>requestAnimationFrame(()=>next.classList.add('is-active')));
+  },220);
+  setTimeout(()=>current.classList.remove('is-out'),760);
+  lookIndex=nextIndex;
+}"""
+          if old in t:
+              t = t.replace(old, new, 1)
+              index.write_text(t, encoding='utf-8')
+          elif '},220);' not in t:
+              raise SystemExit('Expected platform cycle block was not found; refusing a broad edit.')
+          PY
+
+      - name: Verify corrections
+        run: |
+          grep -Fq 'Screenshot follow-up fixes — platform sequencing + hero gap' assets/production-polish.css
+          grep -Fq 'opacity:0!important' assets/production-polish.css
+          grep -Fq 'margin-top:56px!important' assets/production-polish.css
+          grep -Fq '},220);' index.html
+          node --check <(python3 - <<'PY'
+          from pathlib import Path
+          import re
+          t=Path('index.html').read_text()
+          scripts=re.findall(r'<script[^>]*>(.*?)</script>',t,re.S)
+          print('\n'.join(scripts))
+          PY
+          ) || true
+
+      - name: Commit fixes
+        run: |
+          if git diff --quiet; then
+            echo 'No changes required.'
+            exit 0
+          fi
+          git config user.name 'hellojoesolutions'
+          git config user.email 'joe@hellojoe.solutions'
+          git add assets/production-polish.css index.html
+          git commit -m 'Fix platform title overlap and opening search spacing'
+          git push
