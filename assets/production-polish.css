@@ -217,3 +217,59 @@ body:has(.twocol) .related{margin-top:20px!important}
   html{scroll-behavior:auto}
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* Screenshot spacing fixes — 2026-09-15 */
+/* Keep the animated platform names fully visible, enlarge them 50%,
+   and give the opening search animation more breathing room. */
+.hj-look-section{
+  min-height:310px!important;
+  gap:18px!important;
+}
+.hj-look-viewport{
+  max-width:680px!important;
+  height:190px!important;
+  overflow:hidden!important;
+}
+.hj-look-word{
+  font-size:clamp(87px,9vw,135px)!important;
+  line-height:1.06!important;
+  letter-spacing:-.075em!important;
+  padding:.08em 0 .14em!important;
+  box-sizing:border-box!important;
+  transform:translateY(150px)!important;
+}
+.hj-look-word.is-active{
+  transform:translateY(-50%)!important;
+}
+.hj-look-word.is-out{
+  transform:translateY(-230px)!important;
+}
+.opening-searchbar{
+  margin-top:30px!important;
+}
+
+@media(max-width:900px){
+  .hj-look-section{
+    min-height:235px!important;
+  }
+  .hj-look-viewport{
+    height:138px!important;
+    max-width:100%!important;
+  }
+  .hj-look-word{
+    font-size:clamp(60px,16.05vw,90px)!important;
+    line-height:1.06!important;
+    letter-spacing:-.075em!important;
+    padding:.08em 0 .14em!important;
+    transform:translateY(110px)!important;
+  }
+  .hj-look-word.is-active{
+    transform:translateY(-50%)!important;
+  }
+  .hj-look-word.is-out{
+    transform:translateY(-170px)!important;
+  }
+  .opening-searchbar{
+    margin-top:24px!important;
+  }
+}
