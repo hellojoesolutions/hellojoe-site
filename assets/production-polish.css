@@ -273,3 +273,27 @@ body:has(.twocol) .related{margin-top:20px!important}
     margin-top:24px!important;
   }
 }
+
+/* Screenshot follow-up fixes — platform sequencing + hero gap */
+/* Keep the approved 50% platform-title scale, but show only one title at a time. */
+.hj-look-word{
+  opacity:0!important;
+  transition:transform .56s cubic-bezier(.2,.8,.18,1),opacity 0s linear!important;
+}
+.hj-look-word.is-active{
+  opacity:1!important;
+}
+.hj-look-word.is-out{
+  opacity:0!important;
+}
+
+/* Give the descenders in “they / you” a clearly visible cushion above the search bar. */
+.opening-searchbar{
+  margin-top:56px!important;
+}
+
+@media(max-width:900px){
+  .opening-searchbar{
+    margin-top:44px!important;
+  }
+}
