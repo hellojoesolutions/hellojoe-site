@@ -75,7 +75,18 @@
     X-Frame-Options = "SAMEORIGIN"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
+# Launch-polish assets use stable filenames, so force revalidation instead of
+# treating them as fingerprinted immutable assets. This prevents browsers from
+# holding an older CSS/JS version while visual fixes are being deployed.
 [[headers]]
   for = "/assets/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Clear any previously cached immutable launch assets on the homepage response.
+# Remove this short-term header after the current visual-polish round is confirmed.
+[[headers]]
+  for = "/"
+  [headers.values]
+    Clear-Site-Data = "\"cache\""
+    Cache-Control = "no-store"
