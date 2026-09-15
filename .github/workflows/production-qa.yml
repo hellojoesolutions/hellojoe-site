@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   qa:
@@ -164,12 +164,12 @@ jobs:
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
 
-      - name: Commit QA report
-        if: success()
-        run: |
-          git config user.name 'hellojoesolutions'
-          git config user.email 'joe@hellojoe.solutions'
-          git add PRODUCTION_QA.md qa-static.json qa-browser.json
-          if git diff --cached --quiet; then echo 'QA report unchanged.'; exit 0; fi
-          git commit -m 'Record production desktop and mobile QA results'
-          git push
+      - name: Upload QA reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-qa-report
+          path: |
+            PRODUCTION_QA.md
+            qa-static.json
+            qa-browser.json
