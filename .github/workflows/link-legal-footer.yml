@@ -34,22 +34,7 @@ jobs:
           n = Path('netlify.toml')
           t = n.read_text(encoding='utf-8')
           marker = '[[redirects]]\n  from = "/pricing"'
-          redirects = '''[[redirects]]
-  from = "/privacy"
-  to = "/privacy.html"
-  status = 200
-
-[[redirects]]
-  from = "/terms"
-  to = "/terms.html"
-  status = 200
-
-[[redirects]]
-  from = "/accessibility"
-  to = "/accessibility.html"
-  status = 200
-
-'''
+          redirects = '[[redirects]]\n  from = "/privacy"\n  to = "/privacy.html"\n  status = 200\n\n[[redirects]]\n  from = "/terms"\n  to = "/terms.html"\n  status = 200\n\n[[redirects]]\n  from = "/accessibility"\n  to = "/accessibility.html"\n  status = 200\n\n'
           if 'from = "/privacy"' not in t:
               if marker not in t:
                   raise SystemExit('Netlify redirects marker not found')
@@ -61,7 +46,6 @@ jobs:
 
           git config user.name 'hellojoesolutions'
           git config user.email 'joe@hellojoe.solutions'
-          git pull --rebase origin main
           git add -A
           git commit -m 'Link privacy terms and accessibility pages'
           git push origin main
