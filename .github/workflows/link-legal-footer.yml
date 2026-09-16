@@ -1,0 +1,67 @@
+name: Link legal footer pages
+
+on:
+  push:
+    paths:
+      - '.github/workflows/link-legal-footer.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Link footer policy pages and clean workflow
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '<div>Privacy · Terms · Accessibility</div>'
+          new = '<div><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/accessibility">Accessibility</a></div>'
+          if old not in s and new not in s:
+              raise SystemExit('Footer legal text not found')
+          if old in s:
+              s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+
+          n = Path('netlify.toml')
+          t = n.read_text(encoding='utf-8')
+          marker = '[[redirects]]\n  from = "/pricing"'
+          redirects = '''[[redirects]]
+  from = "/privacy"
+  to = "/privacy.html"
+  status = 200
+
+[[redirects]]
+  from = "/terms"
+  to = "/terms.html"
+  status = 200
+
+[[redirects]]
+  from = "/accessibility"
+  to = "/accessibility.html"
+  status = 200
+
+'''
+          if 'from = "/privacy"' not in t:
+              if marker not in t:
+                  raise SystemExit('Netlify redirects marker not found')
+              t = t.replace(marker, redirects + marker, 1)
+              n.write_text(t, encoding='utf-8')
+
+          Path('.github/workflows/link-legal-footer.yml').unlink()
+          PY
+
+          git config user.name 'hellojoesolutions'
+          git config user.email 'joe@hellojoe.solutions'
+          git pull --rebase origin main
+          git add -A
+          git commit -m 'Link privacy terms and accessibility pages'
+          git push origin main
