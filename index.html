@@ -3218,7 +3218,7 @@ h2{
             <div class="gf-review" id="heroReviewCard">
               <div class="gf-review-stars">★★★★★</div>
               <p id="heroReviewText">“Booking was simple, the studio felt welcoming, and I loved how everything turned out.”</p>
-              <span id="heroReviewer">Sample review · fictional business</span>
+              <span id="heroReviewer"></span>
             </div>
 
             <div class="gf-client-strip">
@@ -3930,11 +3930,11 @@ const heroResultCard=document.getElementById('heroResultCard');
 const heroReviewCard=document.getElementById('heroReviewCard');
 
 const heroBusinesses=[
-  {query:'Palma Rosa Beauty Studio',name:'Palma Rosa Beauty Studio',meta:'Beauty & Cosmetics · McAllen, TX',review:'“Booking was simple, the studio felt welcoming, and I loved how everything turned out.”',reviewer:'Sample review · fictional business'},
-  {query:'Rio Bend Plumbing',name:'Rio Bend Plumbing',meta:'Plumbing · Pharr, TX',review:'“They arrived on time, explained what needed fixing, and left everything neat when they finished.”',reviewer:'Sample review · fictional business'},
-  {query:'Sun Mesa Roofing',name:'Sun Mesa Roofing',meta:'Roofing · Weslaco, TX',review:'“The team answered our questions, kept us updated, and made the whole roofing process easier.”',reviewer:'Sample review · fictional business'},
-  {query:'Cactus Trail Home Builders',name:'Cactus Trail Home Builders',meta:'Custom Home Builders · Mission, TX',review:'“They listened to our ideas, paid attention to the details, and kept us informed throughout the build.”',reviewer:'Sample review · fictional business'},
-  {query:'South Palms Landscaping',name:'South Palms Landscaping',meta:'Landscaping · Edinburg, TX',review:'“Our yard looks completely refreshed. The team was easy to work with from planning to cleanup.”',reviewer:'Sample review · fictional business'}
+  {query:'Palma Rosa Beauty Studio',name:'Palma Rosa Beauty Studio',meta:'Beauty & Cosmetics · McAllen, TX',review:'“Booking was simple, the studio felt welcoming, and I loved how everything turned out.”',reviewer:''},
+  {query:'Rio Bend Plumbing',name:'Rio Bend Plumbing',meta:'Plumbing · Pharr, TX',review:'“They arrived on time, explained what needed fixing, and left everything neat when they finished.”',reviewer:''},
+  {query:'Sun Mesa Roofing',name:'Sun Mesa Roofing',meta:'Roofing · Weslaco, TX',review:'“The team answered our questions, kept us updated, and made the whole roofing process easier.”',reviewer:''},
+  {query:'Cactus Trail Home Builders',name:'Cactus Trail Home Builders',meta:'Custom Home Builders · Mission, TX',review:'“They listened to our ideas, paid attention to the details, and kept us informed throughout the build.”',reviewer:''},
+  {query:'South Palms Landscaping',name:'South Palms Landscaping',meta:'Landscaping · Edinburg, TX',review:'“Our yard looks completely refreshed. The team was easy to work with from planning to cleanup.”',reviewer:''}
 ];
 let hi=0,hc=0,hd=false,hlast=0,hpause=0;
 function setHeroBusiness(index){
