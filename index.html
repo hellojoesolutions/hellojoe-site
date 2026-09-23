@@ -3198,7 +3198,7 @@ h2{
             </div>
 
             <div class="gf-result" id="heroResultCard">
-              <div class="gf-result-label">TOP RESULT</div>
+              <div class="gf-result-label">SAMPLE RESULT</div>
               <div class="gf-result-main">
                 <div class="gf-badge">HJ</div>
                 <div class="gf-result-copy">
@@ -3208,7 +3208,7 @@ h2{
               </div>
               <div class="gf-stars-row">
                 <span class="gf-stars">★★★★★</span>
-                <span class="gf-rating">5.0 rating</span>
+                <span class="gf-rating">Sample 5-star rating</span>
               </div>
               <div class="gf-actions">
                 <span>Call</span><span>Directions</span><span>Website</span>
@@ -3217,8 +3217,8 @@ h2{
 
             <div class="gf-review" id="heroReviewCard">
               <div class="gf-review-stars">★★★★★</div>
-              <p id="heroReviewText">“Verified customer feedback will appear here.”</p>
-              <span id="heroReviewer">Review placeholder · verification pending</span>
+              <p id="heroReviewText">“Booking was simple, the studio felt welcoming, and I loved how everything turned out.”</p>
+              <span id="heroReviewer">Sample review · fictional business</span>
             </div>
 
             <div class="gf-client-strip">
@@ -3930,11 +3930,11 @@ const heroResultCard=document.getElementById('heroResultCard');
 const heroReviewCard=document.getElementById('heroReviewCard');
 
 const heroBusinesses=[
-  {query:'Palma Rosa Beauty Studio',name:'Palma Rosa Beauty Studio',meta:'Beauty & Cosmetics · McAllen, TX',review:'“Verified customer feedback will appear here.”',reviewer:'Review placeholder · verification pending'},
-  {query:'Rio Bend Plumbing',name:'Rio Bend Plumbing',meta:'Plumbing · Pharr, TX',review:'“Verified customer feedback will appear here.”',reviewer:'Review placeholder · verification pending'},
-  {query:'Sun Mesa Roofing',name:'Sun Mesa Roofing',meta:'Roofing · Weslaco, TX',review:'“Verified customer feedback will appear here.”',reviewer:'Review placeholder · verification pending'},
-  {query:'Cactus Trail Home Builders',name:'Cactus Trail Home Builders',meta:'Custom Home Builders · Mission, TX',review:'“Verified customer feedback will appear here.”',reviewer:'Review placeholder · verification pending'},
-  {query:'South Palms Landscaping',name:'South Palms Landscaping',meta:'Landscaping · Edinburg, TX',review:'“Verified customer feedback will appear here.”',reviewer:'Review placeholder · verification pending'}
+  {query:'Palma Rosa Beauty Studio',name:'Palma Rosa Beauty Studio',meta:'Beauty & Cosmetics · McAllen, TX',review:'“Booking was simple, the studio felt welcoming, and I loved how everything turned out.”',reviewer:'Sample review · fictional business'},
+  {query:'Rio Bend Plumbing',name:'Rio Bend Plumbing',meta:'Plumbing · Pharr, TX',review:'“They arrived on time, explained what needed fixing, and left everything neat when they finished.”',reviewer:'Sample review · fictional business'},
+  {query:'Sun Mesa Roofing',name:'Sun Mesa Roofing',meta:'Roofing · Weslaco, TX',review:'“The team answered our questions, kept us updated, and made the whole roofing process easier.”',reviewer:'Sample review · fictional business'},
+  {query:'Cactus Trail Home Builders',name:'Cactus Trail Home Builders',meta:'Custom Home Builders · Mission, TX',review:'“They listened to our ideas, paid attention to the details, and kept us informed throughout the build.”',reviewer:'Sample review · fictional business'},
+  {query:'South Palms Landscaping',name:'South Palms Landscaping',meta:'Landscaping · Edinburg, TX',review:'“Our yard looks completely refreshed. The team was easy to work with from planning to cleanup.”',reviewer:'Sample review · fictional business'}
 ];
 let hi=0,hc=0,hd=false,hlast=0,hpause=0;
 function setHeroBusiness(index){
