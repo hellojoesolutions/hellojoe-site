@@ -392,3 +392,20 @@ body:has(.twocol) .related{margin-top:20px!important}
     line-height:1.35!important;
   }
 }
+
+
+/* Short-desktop hero containment — 2026-09-24 */
+/* The right-side animation stage previously forced the two-column hero row to
+   ~980px tall on laptop-height screens. Because the hero itself is sticky and
+   viewport-height, that oversized grid row centered vertically and clipped the
+   headline/CTA area at both the top and bottom. Keep the animation contained
+   inside the available sticky viewport instead. */
+@media (min-width:901px) and (max-height:1000px){
+  .hero .shell.hero-grid{
+    align-items:center!important;
+  }
+  .lead-funnel-stage{
+    min-height:min(720px,calc(100vh - 96px))!important;
+    padding-top:12px!important;
+  }
+}
