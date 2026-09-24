@@ -8,6 +8,66 @@
   pretty_urls = true
 
 [[redirects]]
+  from = "/book-online"
+  to = "/#contact"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/google-business-profile"
+  to = "/resources/google-business-profile"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/google-business-profile.html"
+  to = "/resources/google-business-profile"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/google-rgv"
+  to = "/resources/google-rgv"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/google-rgv.html"
+  to = "/resources/google-rgv"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/marketing-where-to-start"
+  to = "/resources/marketing-where-to-start"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/marketing-where-to-start.html"
+  to = "/resources/marketing-where-to-start"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/website-traffic-no-leads"
+  to = "/resources/website-traffic-no-leads"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/website-traffic-no-leads.html"
+  to = "/resources/website-traffic-no-leads"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/privacy"
   to = "/privacy.html"
   status = 200
